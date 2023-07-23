@@ -1,0 +1,80 @@
+name: 'download-install'
+description: 'Downloads and installs remote files to the local machine'
+inputs:
+  checksum:
+    description: 'Checksum to validate the downloaded file against. Either this or checksum-url is required.'
+    required: false
+    default: ''
+
+  checksum-url:
+    description: 'URL to the checksum file to validate. Either this or checksum is required.'
+    required: false
+
+  checksum-entry:
+    description: 'Used to determine the entry in the checksum file. Required when checksum-url is present.'
+    required: false
+
+  skip-checksum:
+    description: 'Skips checksum evaluation'
+    required: false
+
+  archive-url:
+    description: 'URL to download the archive from.'
+    required: true
+
+  sha-algorithm:
+    description: 'Algorithm used to compare the downloaded archive to the provided checksum. Defaults to `"sha256sum"`.'
+    required: false
+    default: 'sha256sum'
+
+  archive-entries:
+    description: 'Entries in the archive to extract'
+    required: true
+
+  target-path:
+    description: 'Where to extract and install the files. Defaults to `"/usr/local/bin"`.'
+    required: false
+    default: '/usr/local/bin'
+
+  modifier:
+    description: 'Modifier to apply to the extracted files. Defaults to `"+x"`.'
+    required: false
+    default: '+x'
+
+runs:
+  using: 'composite'
+  steps:
+    - id: 'get-checksum'
+      if: ${{ inputs.checksum == '' && inputs.skip-checksum != true }}
+      run: 'echo checksum=$($GITHUB_ACTION_PATH/get-checksum.sh) >> $GITHUB_OUTPUT'
+      shell: 'sh'
+      env:
+        CHECKSUM_URL: ${{ inputs.checksum-url }}
+        CHECKSUM_ENTRY: ${{ inputs.checksum-entry }}
+
+    - id: 'download-archive'
+      run: 'echo archive-file=$($GITHUB_ACTION_PATH/download-archive.sh) >> $GITHUB_OUTPUT'
+      shell: 'sh'
+      env:
+        ARCHIVE_URL: ${{ inputs.archive-url }}
+        SKIP_CHECKSUM: ${{ inputs.skip-checksum }}
+        CHECKSUM: ${{ inputs.checksum == '' && steps.get-checksum.outputs.checksum || inputs.checksum }}
+        SHA_ALGORITHM: ${{ inputs.sha-algorithm }}
+
+    - id: 'extract-archive'
+      run: 'echo extracted-entries=$($GITHUB_ACTION_PATH/extract-archive.sh) >> $GITHUB_OUTPUT'
+      shell: 'sh'
+      env:
+        ARCHIVE_FILE: ${{ steps.download-archive.outputs.archive-file }}
+        ARCHIVE_ENTRIES: ${{ inputs.archive-entries }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        MODIFIER: ${{ inputs.modifier }}
+
+    - if: always()
+      id: 'cleanup'
+      run: 'rm -rf $(dirname ${{ steps.download-archive.outputs.archive-file }}) || exit 0'
+      shell: 'sh'
+
+branding:
+  icon: 'download'
+  color: 'purple'
