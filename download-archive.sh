@@ -22,7 +22,7 @@ fi
 WORKING_DIR=$(mktemp -d)
 ARCHIVE_FILE="${WORKING_DIR}/$(basename "$ARCHIVE_URL")"
 
-curl "${ARCHIVE_URL}" --silent --output "${ARCHIVE_FILE}" > /dev/null
+curl "${ARCHIVE_URL}" --silent --location --output "${ARCHIVE_FILE}" > /dev/null
 
 pushd "${WORKING_DIR}" > /dev/null
 
