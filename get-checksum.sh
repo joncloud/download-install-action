@@ -13,5 +13,5 @@ then
   exit 1
 fi
 
-CHECKSUM=$(curl "${CHECKSUM_URL}" | grep "${CHECKSUM_ENTRY}")
+CHECKSUM=$(curl --silent --location "${CHECKSUM_URL}" | grep "${CHECKSUM_ENTRY}")
 echo "${CHECKSUM}"

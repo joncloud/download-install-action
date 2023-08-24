@@ -26,20 +26,32 @@ fi
 
 pushd "$(dirname "${ARCHIVE_FILE}")" > /dev/null
 
+move-file() {
+  >&2 echo "move-file $1 $2"
+  if [[ -n "${MODIFIER}" ]]
+  then
+    chmod "${MODIFIER}" "${1}" > /dev/null
+  fi
+  mv "${1}" "${2}" > /dev/null
+}
+
+extract-file() {
+  for ENTRY in $(echo "${ARCHIVE_ENTRIES}" | xargs -n 1 echo); do
+    move-file "${ENTRY}" "${TARGET_PATH}"
+    echo "${TARGET_PATH}/${ENTRY}"
+  done
+}
+
 if [[ $ARCHIVE_FILE == *".tar.gz" || $ARCHIVE_FILE == *".tgz" ]]
 then
   tar -zxvf "${ARCHIVE_FILE}" "${ARCHIVE_ENTRIES}" > /dev/null
-else [[ $ARCHIVE_FILE == *".zip" ]]
+  extract-file
+elif [[ $ARCHIVE_FILE == *".zip" ]]
+then
   unzip -o -qq "${ARCHIVE_FILE}" "${ARCHIVE_ENTRIES}" > /dev/null
+  extract-file
+else
+  move-file "${ARCHIVE_FILE}" "${TARGET_PATH}/${ARCHIVE_ENTRIES}"
 fi
-
-for ENTRY in $(echo "${ARCHIVE_ENTRIES}" | xargs -n 1 echo); do
-  if [[ -n "${MODIFIER}" ]]
-  then
-    chmod "${MODIFIER}" "${ENTRY}" > /dev/null
-  fi
-  mv "${ENTRY}" "${TARGET_PATH}" > /dev/null
-  echo "${TARGET_PATH}/${ENTRY}"
-done
 
 popd > /dev/null
