@@ -25,21 +25,21 @@ CHECKSUM="$(./get-checksum.sh)"
 export CHECKSUM
 echo "CHECKSUM=${CHECKSUM}"
 
-# download-archive
-export ARCHIVE_URL=https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_${OS_MONIKER}_${CPU_MONIKER}
+# download-content
+export DOWNLOAD_URL=https://github.com/gruntwork-io/terragrunt/releases/download/${TERRAGRUNT_VERSION}/terragrunt_${OS_MONIKER}_${CPU_MONIKER}
 export SHA_ALGORITHM=sha256sum
-ARCHIVE_FILE="$(./download-archive.sh)"
-export ARCHIVE_FILE
-echo "ARCHIVE_FILE=${ARCHIVE_FILE}"
+DOWNLOAD_FILE="$(./download-content.sh)"
+export DOWNLOAD_FILE
+echo "DOWNLOAD_FILE=${DOWNLOAD_FILE}"
 
-# extract-archive
-export ARCHIVE_ENTRIES=terragrunt
+# extract-content
+export DOWNLOAD_ENTRIES=terragrunt
 export TARGET_PATH="${PWD}/tmp"
 export MODIFIER=+x
-./extract-archive.sh
+./extract-content.sh
 
 # cleanup
-rm -rf "$(dirname "${ARCHIVE_FILE}")"
+rm -rf "$(dirname "${DOWNLOAD_FILE}")"
 
 ./tmp/terragrunt -version | grep "terragrunt version ${TERRAGRUNT_VERSION}"
 

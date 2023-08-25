@@ -26,21 +26,21 @@ CHECKSUM="$(./get-checksum.sh)"
 export CHECKSUM
 echo "CHECKSUM=${CHECKSUM}"
 
-# download-archive
-export ARCHIVE_URL=https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS_MONIKER}_${CPU_MONIKER}.zip
+# download-content
+export DOWNLOAD_URL=https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${OS_MONIKER}_${CPU_MONIKER}.zip
 export SHA_ALGORITHM=sha256sum
-ARCHIVE_FILE="$(./download-archive.sh)"
-export ARCHIVE_FILE
-echo "ARCHIVE_FILE=${ARCHIVE_FILE}"
+DOWNLOAD_FILE="$(./download-content.sh)"
+export DOWNLOAD_FILE
+echo "DOWNLOAD_FILE=${DOWNLOAD_FILE}"
 
-# extract-archive
-export ARCHIVE_ENTRIES=terraform
+# extract-content
+export DOWNLOAD_ENTRIES=terraform
 export TARGET_PATH="${PWD}/tmp"
 export MODIFIER=+x
-./extract-archive.sh
+./extract-content.sh
 
 # cleanup
-rm -rf "$(dirname "${ARCHIVE_FILE}")"
+rm -rf "$(dirname "${DOWNLOAD_FILE}")"
 
 ./tmp/terraform -version | grep "Terraform v${TERRAFORM_VERSION}"
 

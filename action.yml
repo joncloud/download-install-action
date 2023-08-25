@@ -18,18 +18,26 @@ inputs:
     description: 'Skips checksum evaluation'
     required: false
 
+  download-url:
+    description: 'URL to download the contents from.'
+    required: false
+
   archive-url:
-    description: 'URL to download the archive from.'
-    required: true
+    description: 'Deprecated - use download-url - URL to download the contents from.'
+    required: false
 
   sha-algorithm:
-    description: 'Algorithm used to compare the downloaded archive to the provided checksum. Defaults to `"sha256sum"`.'
+    description: 'Algorithm used to compare the downloaded content to the provided checksum. Defaults to `"sha256sum"`.'
     required: false
     default: 'sha256sum'
 
+  download-entries:
+    description: 'Entries in the content to extract'
+    required: false
+
   archive-entries:
-    description: 'Entries in the archive to extract'
-    required: true
+    description: 'Deprecated - use download-entries - Entries in the content to extract'
+    required: false
 
   target-path:
     description: 'Where to extract and install the files. Defaults to `"/usr/local/bin"`.'
@@ -52,27 +60,27 @@ runs:
         CHECKSUM_URL: ${{ inputs.checksum-url }}
         CHECKSUM_ENTRY: ${{ inputs.checksum-entry }}
 
-    - id: 'download-archive'
-      run: 'echo archive-file=$($GITHUB_ACTION_PATH/download-archive.sh) >> $GITHUB_OUTPUT'
+    - id: 'download-content'
+      run: 'echo download-file=$($GITHUB_ACTION_PATH/download-content.sh) >> $GITHUB_OUTPUT'
       shell: 'sh'
       env:
-        ARCHIVE_URL: ${{ inputs.archive-url }}
+        DOWNLOAD_URL: ${{ inputs.download-url || inputs.archive-url }}
         SKIP_CHECKSUM: ${{ inputs.skip-checksum }}
         CHECKSUM: ${{ inputs.checksum == '' && steps.get-checksum.outputs.checksum || inputs.checksum }}
         SHA_ALGORITHM: ${{ inputs.sha-algorithm }}
 
-    - id: 'extract-archive'
-      run: 'echo extracted-entries=$($GITHUB_ACTION_PATH/extract-archive.sh) >> $GITHUB_OUTPUT'
+    - id: 'extract-content'
+      run: 'echo extracted-entries=$($GITHUB_ACTION_PATH/extract-content.sh) >> $GITHUB_OUTPUT'
       shell: 'sh'
       env:
-        ARCHIVE_FILE: ${{ steps.download-archive.outputs.archive-file }}
-        ARCHIVE_ENTRIES: ${{ inputs.archive-entries }}
+        DOWNLOAD_FILE: ${{ steps.download-content.outputs.download-file }}
+        DOWNLOAD_ENTRIES: ${{ inputs.download-entries || inputs.archive-entries }}
         TARGET_PATH: ${{ inputs.target-path }}
         MODIFIER: ${{ inputs.modifier }}
 
     - if: always()
       id: 'cleanup'
-      run: 'rm -rf $(dirname ${{ steps.download-archive.outputs.archive-file }}) || exit 0'
+      run: 'rm -rf $(dirname ${{ steps.download-content.outputs.download-file }}) || exit 0'
       shell: 'sh'
 
 branding:

@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-if [[ -z $ARCHIVE_URL ]]
+if [[ -z $DOWNLOAD_URL ]]
 then
-  >&2 echo "ARCHIVE_URL is required"
+  >&2 echo "DOWNLOAD_URL is required"
   exit 1
 fi
 
@@ -20,9 +20,9 @@ then
 fi
 
 WORKING_DIR=$(mktemp -d)
-ARCHIVE_FILE="${WORKING_DIR}/$(basename "$ARCHIVE_URL")"
+DOWNLOAD_FILE="${WORKING_DIR}/$(basename "$DOWNLOAD_URL")"
 
-curl "${ARCHIVE_URL}" --silent --location --output "${ARCHIVE_FILE}" > /dev/null
+curl "${DOWNLOAD_URL}" --silent --location --output "${DOWNLOAD_FILE}" > /dev/null
 
 pushd "${WORKING_DIR}" > /dev/null
 
@@ -33,4 +33,4 @@ fi
 
 popd > /dev/null
 
-echo "${ARCHIVE_FILE}"
+echo "${DOWNLOAD_FILE}"
